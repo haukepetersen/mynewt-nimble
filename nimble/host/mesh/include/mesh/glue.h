@@ -392,6 +392,7 @@ static inline unsigned int find_msb_set(u32_t op)
 static inline void k_sem_init(struct k_sem *sem, unsigned int initial_count,
 			      unsigned int limit)
 {
+	(void)limit;
 	ble_npl_sem_init(sem, initial_count);
 }
 
