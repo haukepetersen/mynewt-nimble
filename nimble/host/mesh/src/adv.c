@@ -256,8 +256,11 @@ static void bt_mesh_scan_cb(const bt_addr_le_t *addr, s8_t rssi,
 			    u8_t adv_type, struct os_mbuf *buf)
 {
 	if (adv_type != BLE_HCI_ADV_TYPE_ADV_NONCONN_IND) {
+		printf("non Mesh packet, dropped\n");
 		return;
 	}
+
+	printf("got generic Mesh packet\n");
 
 #if BT_MESH_EXTENDED_DEBUG
 	BT_DBG("len %u: %s", buf->om_len, bt_hex(buf->om_data, buf->om_len));
@@ -284,10 +287,12 @@ static void bt_mesh_scan_cb(const bt_addr_le_t *addr, s8_t rssi,
 
 		switch (type) {
 		case BLE_HS_ADV_TYPE_MESH_MESSAGE:
+			printf("Mesh message +1\n");
 			bt_mesh_net_recv(buf, rssi, BT_MESH_NET_IF_ADV);
 			break;
 #if MYNEWT_VAL(BLE_MESH_PB_ADV)
 		case BLE_HS_ADV_TYPE_MESH_PROV:
+			printf("Mesh provisioning message +1\n");
 			bt_mesh_pb_adv_recv(buf);
 			break;
 #endif
@@ -366,6 +371,7 @@ ble_adv_gap_mesh_cb(struct ble_gap_event *event, void *arg)
 		break;
 #endif
 	case BLE_GAP_EVENT_DISC:
+		printf("INCOMING GAP PACKET\n");
 		desc = &event->disc;
 		buf = os_mbuf_get_pkthdr(&adv_os_mbuf_pool, 0);
 		if (!buf || os_mbuf_append(buf, desc->data, desc->length_data)) {
