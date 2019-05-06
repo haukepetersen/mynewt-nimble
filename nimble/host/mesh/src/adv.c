@@ -298,7 +298,7 @@ static void bt_mesh_scan_cb(const bt_addr_le_t *addr, s8_t rssi,
 
 		switch (type) {
 		case BLE_HS_ADV_TYPE_MESH_MESSAGE:
-			printf("Mesh message +1\n");
+			// printf("Mesh message +1\n");
 			++mystats.rx_mesh_data;
 			bt_mesh_net_recv(buf, rssi, BT_MESH_NET_IF_ADV);
 			break;
