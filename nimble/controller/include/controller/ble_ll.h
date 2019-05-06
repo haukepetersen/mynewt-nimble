@@ -26,6 +26,9 @@
 #include "nimble/nimble_npl.h"
 #include "controller/ble_phy.h"
 
+/* TEMP HACK FOR RIOT-based BENCHMARKS */
+#include "host/mystats.h"
+
 #ifdef MYNEWT
 #include "controller/ble_ll_ctrl.h"
 #include "hal/hal_system.h"

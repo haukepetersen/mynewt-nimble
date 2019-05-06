@@ -45,6 +45,9 @@
 #include "host/ble_uuid.h"
 #include "nimble/nimble_npl.h"
 
+/* TEMP HACK FOR RIOT-based BENCHMARKS */
+#include "host/mystats.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -371,7 +374,7 @@ void ble_hs_init(void);
  *                                  HAL_RESET_[...] codes or an
  *                                  implementation-defined value.
  *
- * @return                      SYSDOWN_IN_PROGRESS. 
+ * @return                      SYSDOWN_IN_PROGRESS.
  */
 int ble_hs_shutdown(int reason);
 

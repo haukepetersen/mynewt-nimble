@@ -1077,6 +1077,7 @@ ble_ll_adv_tx_start_cb(struct ble_ll_sched_item *sch)
 
     /* Count # of adv. sent */
     STATS_INC(ble_ll_stats, adv_txg);
+    ++mystats.tx_all;
 
     return BLE_LL_SCHED_STATE_RUNNING;
 
@@ -1217,6 +1218,7 @@ ble_ll_adv_secondary_tx_start_cb(struct ble_ll_sched_item *sch)
 
     /* Count # of adv. sent */
     STATS_INC(ble_ll_stats, adv_txg);
+    ++mystats.tx_all;
 
     return BLE_LL_SCHED_STATE_RUNNING;
 
@@ -2080,6 +2082,7 @@ ble_ll_adv_sync_tx_start_cb(struct ble_ll_sched_item *sch)
 
     /* Count # of adv. sent */
     STATS_INC(ble_ll_stats, adv_txg);
+    ++mystats.tx_all;
 
     return BLE_LL_SCHED_STATE_RUNNING;
 

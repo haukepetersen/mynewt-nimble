@@ -25,6 +25,9 @@
 #include "prov.h"
 #include "proxy.h"
 
+/* TMP: custom stats only */
+#include "host/mystats.h"
+
 /* Convert from ms to 0.625ms units */
 #define ADV_SCAN_UNIT(_ms) ((_ms) * 8 / 5)
 
@@ -256,27 +259,35 @@ static void bt_mesh_scan_cb(const bt_addr_le_t *addr, s8_t rssi,
 			    u8_t adv_type, struct os_mbuf *buf)
 {
 	if (adv_type != BLE_HCI_ADV_TYPE_ADV_NONCONN_IND) {
-		printf("non Mesh packet, dropped\n");
+		// printf("non Mesh packet, dropped\n");
+		++mystats.rx_nonmesh;
 		return;
 	}
+	else {
+		++mystats.rx_nonconn_ind;
+	}
 
-	printf("got generic Mesh packet\n");
+	// printf("got generic Mesh packet\n");
 
 #if BT_MESH_EXTENDED_DEBUG
 	BT_DBG("len %u: %s", buf->om_len, bt_hex(buf->om_data, buf->om_len));
 #endif
 
 	while (buf->om_len > 1) {
+		++mystats.rx_cand;
 		struct net_buf_simple_state state;
 		u8_t len, type;
 
 		len = net_buf_simple_pull_u8(buf);
 		/* Check for early termination */
 		if (len == 0) {
+			++mystats.rx_cand_nolen;
+			// printf("rx: len == 0\n");
 			return;
 		}
 
 		if (len > buf->om_len) {
+			++mystats.rx_cand_malformed;
 			BT_WARN("AD malformed");
 			return;
 		}
@@ -288,18 +299,22 @@ static void bt_mesh_scan_cb(const bt_addr_le_t *addr, s8_t rssi,
 		switch (type) {
 		case BLE_HS_ADV_TYPE_MESH_MESSAGE:
 			printf("Mesh message +1\n");
+			++mystats.rx_mesh_data;
 			bt_mesh_net_recv(buf, rssi, BT_MESH_NET_IF_ADV);
 			break;
 #if MYNEWT_VAL(BLE_MESH_PB_ADV)
 		case BLE_HS_ADV_TYPE_MESH_PROV:
-			printf("Mesh provisioning message +1\n");
+			// printf("Mesh provisioning message +1\n");
+			++mystats.rx_mesh_prov;
 			bt_mesh_pb_adv_recv(buf);
 			break;
 #endif
 		case BLE_HS_ADV_TYPE_MESH_BEACON:
+			++mystats.rx_mesh_beacon;
 			bt_mesh_beacon_recv(buf);
 			break;
 		default:
+			++mystats.rx_type_nomesh;
 			break;
 		}
 
@@ -371,7 +386,8 @@ ble_adv_gap_mesh_cb(struct ble_gap_event *event, void *arg)
 		break;
 #endif
 	case BLE_GAP_EVENT_DISC:
-		printf("INCOMING GAP PACKET\n");
+		// printf("INCOMING GAP PACKET\n");
+		++mystats.rx_all;
 		desc = &event->disc;
 		buf = os_mbuf_get_pkthdr(&adv_os_mbuf_pool, 0);
 		if (!buf || os_mbuf_append(buf, desc->data, desc->length_data)) {

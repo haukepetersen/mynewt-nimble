@@ -1309,7 +1309,8 @@ void bt_mesh_net_recv(struct os_mbuf *data, s8_t rssi,
 	BT_DBG("rssi %d net_if %u", rssi, net_if);
 
 	if (!bt_mesh_is_provisioned()) {
-		BT_ERR("Not provisioned; dropping packet");
+		++mystats.rx_mesh_dropped_notprov;
+		// BT_ERR("Not provisioned; dropping packet");
 		goto done;
 	}
 
