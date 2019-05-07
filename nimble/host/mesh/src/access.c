@@ -183,6 +183,7 @@ static int publish_retransmit(struct bt_mesh_model *mod)
 
 	pub->count--;
 
+	++mystats.tx_mesh_model_retrans;
 	err = bt_mesh_trans_send(&tx, sdu, &pub_sent_cb, mod);
 
 done:
@@ -641,6 +642,7 @@ static int model_send(struct bt_mesh_model *model,
 		return -EINVAL;
 	}
 
+	++mystats.tx_mesh_model_send;
 	return bt_mesh_trans_send(tx, msg, cb, cb_data);
 }
 
@@ -719,6 +721,7 @@ int bt_mesh_model_publish(struct bt_mesh_model *model)
 	BT_DBG("Publish Retransmit Count %u Interval %ums", pub->count,
 	       BT_MESH_PUB_TRANSMIT_INT(pub->retransmit));
 
+	++mystats.tx_mesh_model_pub;
 	err = model_send(model, &tx, true, sdu, &pub_sent_cb, model);
 	if (err) {
 		/* Don't try retransmissions for this publish attempt */

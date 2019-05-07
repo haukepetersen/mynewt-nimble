@@ -139,6 +139,8 @@ static int send_unseg(struct bt_mesh_net_tx *tx, struct os_mbuf *sdu,
 		}
 	}
 
+	++mystats.tx_mesh_transport_unseg;
+
 	return bt_mesh_net_send(tx, buf, cb, cb_data);
 }
 
@@ -344,6 +346,8 @@ static int send_seg(struct bt_mesh_net_tx *net_tx, struct os_mbuf *sdu,
 
 	BT_DBG("SeqZero 0x%04x", seq_zero);
 
+	++mystats.tx_mesh_transport_seg;
+
 	for (seg_o = 0; sdu->om_len; seg_o++) {
 		struct os_mbuf *seg;
 		u16_t len;
@@ -491,6 +495,7 @@ int bt_mesh_trans_send(struct bt_mesh_net_tx *tx, struct os_mbuf *msg,
 		return err;
 	}
 
+	++mystats.tx_mesh_transport;
 	if (tx->ctx->send_rel) {
 		err = send_seg(tx, msg, cb, cb_data);
 	} else {
@@ -954,6 +959,8 @@ int bt_mesh_ctl_send(struct bt_mesh_net_tx *tx, u8_t ctl_op, void *data,
 			return 0;
 		}
 	}
+
+	++mystats.tx_mesh_transport_ctl;
 
 	return bt_mesh_net_send(tx, buf, cb, cb_data);
 }

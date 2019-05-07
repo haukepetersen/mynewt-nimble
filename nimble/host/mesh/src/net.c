@@ -875,6 +875,8 @@ int bt_mesh_net_send(struct bt_mesh_net_tx *tx, struct os_mbuf *buf,
 	BT_DBG("encoded %u bytes: %s", buf->om_len,
 		   bt_hex(buf->om_data, buf->om_len));
 
+	++mystats.tx_mesh_net_send;
+
 	/* Deliver to GATT Proxy Clients if necessary. Mesh spec 3.4.5.2:
 	 * "The output filter of the interface connected to advertising or
 	 * GATT bearers shall drop all messages with TTL value set to 1."

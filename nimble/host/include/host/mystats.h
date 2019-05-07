@@ -14,6 +14,18 @@ typedef struct {
     unsigned tx_all;            /* every adv (GAP) packet sent */
     unsigned tx_mesh_data;      /* every mesh data pkt sent */
     unsigned tx_mesh_prov;      /* every mesh prov pkt sent (adv bearer) */
+    unsigned tx_mesh_beacon;
+
+    unsigned tx_mesh_net_send;
+
+    unsigned tx_mesh_transport_unseg;
+    unsigned tx_mesh_transport_seg;
+    unsigned tx_mesh_transport_ctl;
+    unsigned tx_mesh_transport;
+
+    unsigned tx_mesh_model_send;
+    unsigned tx_mesh_model_pub;
+    unsigned tx_mesh_model_retrans;
 
     unsigned rx_all;            /* every single adv (GAP) packet received */
     unsigned rx_nonmesh;        /* non BT Mesh advertising packets */
