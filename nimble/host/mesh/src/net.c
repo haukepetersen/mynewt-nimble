@@ -906,6 +906,7 @@ int bt_mesh_net_send(struct bt_mesh_net_tx *tx, struct os_mbuf *buf,
 	/* Deliver to local network interface if necessary */
 	if (bt_mesh_fixed_group_match(tx->ctx->addr) ||
 	    bt_mesh_elem_find(tx->ctx->addr)) {
+		++mystats.tx_mesh_net_send_local;
 		if (cb && cb->start) {
 			cb->start(0, 0, cb_data);
 		}
@@ -915,6 +916,7 @@ int bt_mesh_net_send(struct bt_mesh_net_tx *tx, struct os_mbuf *buf,
 		}
 		k_work_submit(&bt_mesh.local_work);
 	} else if (tx->ctx->send_ttl != 1) {
+		++mystats.tx_mesh_net_send_adv;
 		/* Deliver to to the advertising network interface. Mesh spec
 		 * 3.4.5.2: "The output filter of the interface connected to
 		 * advertising or GATT bearers shall drop all messages with
