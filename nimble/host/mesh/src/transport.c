@@ -495,7 +495,8 @@ int bt_mesh_trans_send(struct bt_mesh_net_tx *tx, struct os_mbuf *msg,
 		return err;
 	}
 
-	++mystats.tx_mesh_transport;
+	mystats_inc_tx_trans();
+
 	if (tx->ctx->send_rel) {
 		err = send_seg(tx, msg, cb, cb_data);
 	} else {
@@ -1364,6 +1365,8 @@ int bt_mesh_trans_recv(struct os_mbuf *buf, struct bt_mesh_net_rx *rx)
 	} else {
 		rx->friend_match = false;
 	}
+
+	mystats_inc_rx_trans();
 
 	BT_DBG("src 0x%04x dst 0x%04x seq 0x%08x friend_match %u",
 	       rx->ctx.addr, rx->ctx.recv_dst, (unsigned) rx->seq,

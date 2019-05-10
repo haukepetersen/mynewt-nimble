@@ -765,6 +765,8 @@ int bt_mesh_net_resend(struct bt_mesh_subnet *sub, struct os_mbuf *buf,
 		return err;
 	}
 
+	++mystats.tx_mesh_net_resend;
+
 	bt_mesh_adv_send(buf, cb, cb_data);
 
 	if (!atomic_test_bit(bt_mesh.flags, BT_MESH_IVU_IN_PROGRESS) &&
@@ -906,7 +908,9 @@ int bt_mesh_net_send(struct bt_mesh_net_tx *tx, struct os_mbuf *buf,
 	/* Deliver to local network interface if necessary */
 	if (bt_mesh_fixed_group_match(tx->ctx->addr) ||
 	    bt_mesh_elem_find(tx->ctx->addr)) {
-		++mystats.tx_mesh_net_send_local;
+
+		mystats_inc_tx_net_send_local();
+
 		if (cb && cb->start) {
 			cb->start(0, 0, cb_data);
 		}
@@ -916,7 +920,9 @@ int bt_mesh_net_send(struct bt_mesh_net_tx *tx, struct os_mbuf *buf,
 		}
 		k_work_submit(&bt_mesh.local_work);
 	} else if (tx->ctx->send_ttl != 1) {
-		++mystats.tx_mesh_net_send_adv;
+
+		mystats_inc_tx_net_send_adv();
+
 		/* Deliver to to the advertising network interface. Mesh spec
 		 * 3.4.5.2: "The output filter of the interface connected to
 		 * advertising or GATT bearers shall drop all messages with
@@ -998,17 +1004,20 @@ static int net_decrypt(struct bt_mesh_subnet *sub, const u8_t *enc,
 	memcpy(net_buf_simple_add(buf, data_len), data, data_len);
 
 	if (bt_mesh_net_obfuscate(buf->om_data, BT_MESH_NET_IVI_RX(rx), priv)) {
+		++mystats.rx_mesh_net_decode_obffail;
 		return -ENOENT;
 	}
 
 	if (rx->net_if == BT_MESH_NET_IF_ADV && msg_cache_match(rx, buf)) {
 		BT_WARN("Duplicate found in Network Message Cache");
+		++mystats.rx_mesh_net_decode_duplcache;
 		return -EALREADY;
 	}
 
 	rx->ctx.addr = SRC(buf->om_data);
 	if (!BT_MESH_ADDR_IS_UNICAST(rx->ctx.addr)) {
 		BT_WARN("Ignoring non-unicast src addr 0x%04x", rx->ctx.addr);
+		++mystats.rx_mesh_net_decode_ignore;
 		return -EINVAL;
 	}
 
@@ -1016,10 +1025,12 @@ static int net_decrypt(struct bt_mesh_subnet *sub, const u8_t *enc,
 
 	if ((MYNEWT_VAL(BLE_MESH_PROXY)) &&
 	    rx->net_if == BT_MESH_NET_IF_PROXY_CFG) {
+		++mystats.rx_mesh_net_decode_decrypt_ok;
 		return bt_mesh_net_decrypt(enc, buf, BT_MESH_NET_IVI_RX(rx),
 					   true);
 	}
 
+	++mystats.rx_mesh_net_decode_decrypt_ok;
 	return bt_mesh_net_decrypt(enc, buf, BT_MESH_NET_IVI_RX(rx), false);
 }
 
@@ -1229,6 +1240,8 @@ static void bt_mesh_net_relay(struct os_mbuf *sbuf,
 		}
 	}
 
+	mystats_inc_tx_net_send_relay();
+
 	if (relay_to_adv(rx->net_if)) {
 		bt_mesh_adv_send(buf, NULL, NULL);
 	}
@@ -1311,16 +1324,21 @@ void bt_mesh_net_recv(struct os_mbuf *data, s8_t rssi,
 	struct net_buf_simple_state state;
 
 	BT_DBG("rssi %d net_if %u", rssi, net_if);
+	++mystats.rx_mesh_net;
 
 	if (!bt_mesh_is_provisioned()) {
-		++mystats.rx_mesh_dropped_notprov;
+		++mystats.rx_mesh_net_notprov;
 		// BT_ERR("Not provisioned; dropping packet");
 		goto done;
 	}
 
 	if (bt_mesh_net_decode(data, net_if, &rx, buf)) {
+
+		mystats_inc_rx_net_drop();
+
 		goto done;
 	}
+
 
 	/* Save the state so the buffer can later be relayed */
 	net_buf_simple_save(buf, &state);
@@ -1333,6 +1351,7 @@ void bt_mesh_net_recv(struct os_mbuf *data, s8_t rssi,
 	rx.local_match = (bt_mesh_fixed_group_match(rx.ctx.recv_dst) ||
 			  bt_mesh_elem_find(rx.ctx.recv_dst));
 
+	// ++mystats.rx_mesh_net_pass_to_trans;
 	bt_mesh_trans_recv(buf, &rx);
 
 	/* Relay if this was a group/virtual address, or if the destination
@@ -1340,6 +1359,9 @@ void bt_mesh_net_recv(struct os_mbuf *data, s8_t rssi,
 	 */
 	if (!BT_MESH_ADDR_IS_UNICAST(rx.ctx.recv_dst) ||
 	    (!rx.local_match && !rx.friend_match)) {
+
+		++mystats.rx_mesh_net_relay;
+
 		net_buf_simple_restore(buf, &state);
 		bt_mesh_net_relay(buf, &rx);
 	}

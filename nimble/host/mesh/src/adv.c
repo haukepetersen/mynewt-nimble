@@ -106,6 +106,9 @@ static inline void adv_send(struct os_mbuf *buf)
 	struct bt_data ad;
 	int err;
 
+	// ++mystats.tx_mesh_adv_send;
+	mystats_inc_tx_adv_send();
+
 	adv_int = max(adv_int_min,
 		      BT_MESH_TRANSMIT_INT(BT_MESH_ADV(buf)->xmit));
 	duration = (MESH_SCAN_WINDOW_MS +
@@ -126,6 +129,12 @@ static inline void adv_send(struct os_mbuf *buf)
 	param.itvl_max = param.itvl_min;
 	param.conn_mode = BLE_GAP_CONN_MODE_NON;
 
+	// printf("adv: cnt: %i, itvl: %i, duration: %i\n",
+	// 		(int)(BT_MESH_TRANSMIT_COUNT(BT_MESH_ADV(buf)->xmit + 1)),
+	// 		(int)adv_int,
+	// 		(int)duration);
+
+	++mystats.tx_mesh_adv_start;
 	err = bt_le_adv_start(&param, &ad, 1, NULL, 0);
 	net_buf_unref(buf);
 	adv_send_start(duration, err, cb, cb_data);
@@ -138,6 +147,7 @@ static inline void adv_send(struct os_mbuf *buf)
 
 	k_sleep(K_MSEC(duration));
 
+	++mystats.tx_mesh_adv_stop;
 	err = bt_le_adv_stop(false);
 	adv_send_end(err, cb, cb_data);
 	if (err) {
@@ -252,6 +262,8 @@ void bt_mesh_adv_send(struct os_mbuf *buf, const struct bt_mesh_send_cb *cb,
 	BT_MESH_ADV(buf)->cb_data = cb_data;
 	BT_MESH_ADV(buf)->busy = 1;
 
+	++mystats.tx_mesh_adv_put;
+
 	net_buf_put(&adv_queue, net_buf_ref(buf));
 }
 
@@ -299,18 +311,25 @@ static void bt_mesh_scan_cb(const bt_addr_le_t *addr, s8_t rssi,
 		switch (type) {
 		case BLE_HS_ADV_TYPE_MESH_MESSAGE:
 			// printf("Mesh message +1\n");
-			++mystats.rx_mesh_data;
+
+			mystats_inc_rx_adv_data();
+			// ++mystats.rx_mesh_adv_in;
+
 			bt_mesh_net_recv(buf, rssi, BT_MESH_NET_IF_ADV);
 			break;
 #if MYNEWT_VAL(BLE_MESH_PB_ADV)
 		case BLE_HS_ADV_TYPE_MESH_PROV:
+
 			// printf("Mesh provisioning message +1\n");
-			++mystats.rx_mesh_prov;
+			++mystats.rx_mesh_adv_prov;
+
 			bt_mesh_pb_adv_recv(buf);
 			break;
 #endif
 		case BLE_HS_ADV_TYPE_MESH_BEACON:
-			++mystats.rx_mesh_beacon;
+
+			++mystats.rx_mesh_adv_beacon;
+
 			bt_mesh_beacon_recv(buf);
 			break;
 		default:
