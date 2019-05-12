@@ -406,8 +406,13 @@ ble_adv_gap_mesh_cb(struct ble_gap_event *event, void *arg)
 #endif
 	case BLE_GAP_EVENT_DISC:
 		// printf("INCOMING GAP PACKET\n");
-		++mystats.rx_all;
 		desc = &event->disc;
+
+		if (myfilter_drop(desc->addr.val)) {
+			break;
+		}
+
+		++mystats.rx_all;
 		buf = os_mbuf_get_pkthdr(&adv_os_mbuf_pool, 0);
 		if (!buf || os_mbuf_append(buf, desc->data, desc->length_data)) {
 			BT_ERR("Could not append data");

@@ -47,6 +47,7 @@
 
 /* TEMP HACK FOR RIOT-based BENCHMARKS */
 #include "host/mystats.h"
+#include "host/myfilter.h"
 
 #ifdef __cplusplus
 extern "C" {
