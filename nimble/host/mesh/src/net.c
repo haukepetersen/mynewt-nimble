@@ -1009,14 +1009,14 @@ static int net_decrypt(struct bt_mesh_subnet *sub, const u8_t *enc,
 	}
 
 	if (rx->net_if == BT_MESH_NET_IF_ADV && msg_cache_match(rx, buf)) {
-		BT_WARN("Duplicate found in Network Message Cache");
+		BT_DBG("Duplicate found in Network Message Cache");
 		++mystats.rx_mesh_net_decode_duplcache;
 		return -EALREADY;
 	}
 
 	rx->ctx.addr = SRC(buf->om_data);
 	if (!BT_MESH_ADDR_IS_UNICAST(rx->ctx.addr)) {
-		BT_WARN("Ignoring non-unicast src addr 0x%04x", rx->ctx.addr);
+		BT_DBG("Ignoring non-unicast src addr 0x%04x", rx->ctx.addr);
 		++mystats.rx_mesh_net_decode_ignore;
 		return -EINVAL;
 	}
