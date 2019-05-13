@@ -107,7 +107,10 @@ static inline void adv_send(struct os_mbuf *buf)
 	int err;
 
 	// ++mystats.tx_mesh_adv_send;
-	mystats_inc_tx_adv_send();
+	// int mic;
+	// memcpy(&mic, buf->om_data + (buf->om_len -4), 4);
+	// mystats_inc_tx_adv_send(mic);
+    ++mystats.tx_mesh_adv_send;
 
 	adv_int = max(adv_int_min,
 		      BT_MESH_TRANSMIT_INT(BT_MESH_ADV(buf)->xmit));
@@ -262,8 +265,6 @@ void bt_mesh_adv_send(struct os_mbuf *buf, const struct bt_mesh_send_cb *cb,
 	BT_MESH_ADV(buf)->cb_data = cb_data;
 	BT_MESH_ADV(buf)->busy = 1;
 
-	++mystats.tx_mesh_adv_put;
-
 	net_buf_put(&adv_queue, net_buf_ref(buf));
 }
 
@@ -308,12 +309,15 @@ static void bt_mesh_scan_cb(const bt_addr_le_t *addr, s8_t rssi,
 
 		type = net_buf_simple_pull_u8(buf);
 
+		// int mic;
+		// memcpy(&mic, buf->om_data + (buf->om_len -4), 4);
+
 		switch (type) {
 		case BLE_HS_ADV_TYPE_MESH_MESSAGE:
 			// printf("Mesh message +1\n");
 
-			mystats_inc_rx_adv_data();
-			// ++mystats.rx_mesh_adv_in;
+			// mystats_inc_rx_adv_data(mic);
+			++mystats.rx_mesh_adv_in;
 
 			bt_mesh_net_recv(buf, rssi, BT_MESH_NET_IF_ADV);
 			break;

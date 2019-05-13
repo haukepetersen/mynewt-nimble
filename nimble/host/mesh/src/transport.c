@@ -1366,8 +1366,6 @@ int bt_mesh_trans_recv(struct os_mbuf *buf, struct bt_mesh_net_rx *rx)
 		rx->friend_match = false;
 	}
 
-	mystats_inc_rx_trans();
-
 	BT_DBG("src 0x%04x dst 0x%04x seq 0x%08x friend_match %u",
 	       rx->ctx.addr, rx->ctx.recv_dst, (unsigned) rx->seq,
 	       rx->friend_match);

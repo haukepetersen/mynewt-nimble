@@ -877,6 +877,10 @@ int bt_mesh_net_send(struct bt_mesh_net_tx *tx, struct os_mbuf *buf,
 	BT_DBG("encoded %u bytes: %s", buf->om_len,
 		   bt_hex(buf->om_data, buf->om_len));
 
+
+	int mic;
+	memcpy(&mic, buf->om_data + (buf->om_len - 4), 4);
+	// printf("net_send: len %u, mic: %u\n", (unsigned)buf->om_len, (unsigned)mic);
 	++mystats.tx_mesh_net_send;
 
 	/* Deliver to GATT Proxy Clients if necessary. Mesh spec 3.4.5.2:
@@ -909,7 +913,7 @@ int bt_mesh_net_send(struct bt_mesh_net_tx *tx, struct os_mbuf *buf,
 	if (bt_mesh_fixed_group_match(tx->ctx->addr) ||
 	    bt_mesh_elem_find(tx->ctx->addr)) {
 
-		mystats_inc_tx_net_send_local();
+		mystats_inc_tx_net_send_local(mic);
 
 		if (cb && cb->start) {
 			cb->start(0, 0, cb_data);
@@ -921,7 +925,7 @@ int bt_mesh_net_send(struct bt_mesh_net_tx *tx, struct os_mbuf *buf,
 		k_work_submit(&bt_mesh.local_work);
 	} else if (tx->ctx->send_ttl != 1) {
 
-		mystats_inc_tx_net_send_adv();
+		mystats_inc_tx_net_send_adv(mic);
 
 		/* Deliver to to the advertising network interface. Mesh spec
 		 * 3.4.5.2: "The output filter of the interface connected to
@@ -1240,7 +1244,9 @@ static void bt_mesh_net_relay(struct os_mbuf *sbuf,
 		}
 	}
 
-	mystats_inc_tx_net_send_relay();
+	int mic;
+	memcpy(&mic, buf->om_data + (buf->om_len - 4), 4);
+	mystats_inc_tx_net_send_relay(mic);
 
 	if (relay_to_adv(rx->net_if)) {
 		bt_mesh_adv_send(buf, NULL, NULL);
@@ -1324,7 +1330,17 @@ void bt_mesh_net_recv(struct os_mbuf *data, s8_t rssi,
 	struct net_buf_simple_state state;
 
 	BT_DBG("rssi %d net_if %u", rssi, net_if);
-	++mystats.rx_mesh_net;
+	// ++mystats.rx_mesh_net;
+
+	int mic;
+	memcpy(&mic, data->om_data + (data->om_len - 4), 4);
+	mystats_inc_rx_net(mic);
+
+
+	// printf("net_rx: pkt len: %u\n", (unsigned)data->om_len);
+	// uint32_t mic;
+	// memcpy(&mic, data->om_data, data->om_len - 4);
+	// printf("net_rx: mic: %u\n", (unsigned)mic);
 
 	if (!bt_mesh_is_provisioned()) {
 		++mystats.rx_mesh_net_notprov;
@@ -1334,7 +1350,7 @@ void bt_mesh_net_recv(struct os_mbuf *data, s8_t rssi,
 
 	if (bt_mesh_net_decode(data, net_if, &rx, buf)) {
 
-		mystats_inc_rx_net_drop();
+		mystats_inc_rx_net_drop(mic);
 
 		goto done;
 	}
@@ -1352,6 +1368,7 @@ void bt_mesh_net_recv(struct os_mbuf *data, s8_t rssi,
 			  bt_mesh_elem_find(rx.ctx.recv_dst));
 
 	// ++mystats.rx_mesh_net_pass_to_trans;
+	mystats_inc_rx_trans(mic);
 	bt_mesh_trans_recv(buf, &rx);
 
 	/* Relay if this was a group/virtual address, or if the destination
