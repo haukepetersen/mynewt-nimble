@@ -121,110 +121,118 @@ static inline void mystats_inc_rx_app(const char *op, unsigned tid)
 
 static inline void mystats_inc_tx_trans(void)
 {
-    if (mystats_en == 0) {
-        return;
-    }
-    mutex_lock(&mystats_lock);
+    // if (mystats_en == 0) {
+    //     return;
+    // }
+    // mutex_lock(&mystats_lock);
     ++mystats.tx_mesh_transport;
-    _time();
-    printf("tx;trans;;\n");
-    mutex_unlock(&mystats_lock);
+    // _time();
+    // printf("tx;trans;;\n");
+    // mutex_unlock(&mystats_lock);
 }
 
 static inline void mystats_inc_rx_trans(int mic)
 {
-    if (mystats_en == 0) {
-        return;
-    }
-    mutex_lock(&mystats_lock);
+    (void)mic;
+    // if (mystats_en == 0) {
+    //     return;
+    // }
+    // mutex_lock(&mystats_lock);
     ++mystats.rx_mesh_trans;
-    _time();
-    printf("rx;trans;;%08x\n", mic);
-    mutex_unlock(&mystats_lock);
+    // _time();
+    // printf("rx;trans;;%08x\n", mic);
+    // mutex_unlock(&mystats_lock);
 }
 
 static inline void mystats_inc_tx_net_send_adv(int mic)
 {
-    if (mystats_en == 0) {
-        return;
-    }
-    mutex_lock(&mystats_lock);
+    (void)mic;
+    // if (mystats_en == 0) {
+    //     return;
+    // }
+    // mutex_lock(&mystats_lock);
     ++mystats.tx_mesh_net_send_adv;
-    _time();
-    printf("tx;net;send_adv;%08x\n", mic);
-    mutex_unlock(&mystats_lock);
+    // _time();
+    // printf("tx;net;send_adv;%08x\n", mic);
+    // mutex_unlock(&mystats_lock);
 }
 
 static inline void mystats_inc_tx_net_send_local(int mic)
 {
-    if (mystats_en == 0) {
-        return;
-    }
-    mutex_lock(&mystats_lock);
+    (void)mic;
+    // if (mystats_en == 0) {
+    //     return;
+    // }
+    // mutex_lock(&mystats_lock);
     ++mystats.tx_mesh_net_send_local;
-    _time();
-    printf("tx;net;send_local;%08x\n", mic);
-    mutex_unlock(&mystats_lock);
+    // _time();
+    // printf("tx;net;send_local;%08x\n", mic);
+    // mutex_unlock(&mystats_lock);
 }
 
 static inline void mystats_inc_tx_net_send_relay(int mic)
 {
-    if (mystats_en == 0) {
-        return;
-    }
-    mutex_lock(&mystats_lock);
+    (void)mic;
+    // if (mystats_en == 0) {
+    //     return;
+    // }
+    // mutex_lock(&mystats_lock);
     ++mystats.tx_mesh_net_relay;
-    _time();
-    printf("tx;net;send_relay;%08x\n", mic);
-    mutex_unlock(&mystats_lock);
+    // _time();
+    // printf("tx;net;send_relay;%08x\n", mic);
+    // mutex_unlock(&mystats_lock);
 }
 
 static inline void mystats_inc_rx_net(int mic)
 {
-    if (mystats_en == 0) {
-        return;
-    }
-    mutex_lock(&mystats_lock);
+    (void)mic;
+    // if (mystats_en == 0) {
+    //     return;
+    // }
+    // mutex_lock(&mystats_lock);
     ++mystats.rx_mesh_net;
-    _time();
-    printf("rx;net;;%08x\n", mic);
-    mutex_unlock(&mystats_lock);
+//     _time();
+//     printf("rx;net;;%08x\n", mic);
+//     mutex_unlock(&mystats_lock);
 }
 
 static inline void mystats_inc_rx_net_drop(int mic)
 {
-    if (mystats_en == 0) {
-        return;
-    }
-    mutex_lock(&mystats_lock);
+    (void)mic;
+    // if (mystats_en == 0) {
+    //     return;
+    // }
+    // mutex_lock(&mystats_lock);
     ++mystats.rx_mesh_net_decode_fail;
-    _time();
-    printf("rx;net;drop;%08x\n", mic);
-    mutex_unlock(&mystats_lock);
+    // _time();
+    // printf("rx;net;drop;%08x\n", mic);
+    // mutex_unlock(&mystats_lock);
 }
 
 static inline void mystats_inc_tx_adv_send(int mic)
 {
-    if (mystats_en == 0) {
-        return;
-    }
-    mutex_lock(&mystats_lock);
+    (void)mic;
+    // if (mystats_en == 0) {
+    //     return;
+    // }
+    // mutex_lock(&mystats_lock);
     ++mystats.tx_mesh_adv_send;
-    _time();
-    printf("tx;adv;send;%08x\n", mic);
-    mutex_unlock(&mystats_lock);
+    // _time();
+    // printf("tx;adv;send;%08x\n", mic);
+    // mutex_unlock(&mystats_lock);
 }
 
 static inline void mystats_inc_rx_adv_data(int mic)
 {
-    if (mystats_en == 0) {
-        return;
-    }
-    mutex_lock(&mystats_lock);
+    (void)mic;
+    // if (mystats_en == 0) {
+    //     return;
+    // }
+    // mutex_lock(&mystats_lock);
     ++mystats.rx_mesh_adv_in;
-    _time();
-    printf("rx;adv;data;%08x\n", mic);
-    mutex_unlock(&mystats_lock);
+    // _time();
+    // printf("rx;adv;data;%08x\n", mic);
+    // mutex_unlock(&mystats_lock);
 }
 
 #ifdef __cplusplus
