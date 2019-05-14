@@ -883,7 +883,7 @@ static int trans_unseg(struct os_mbuf *buf, struct bt_mesh_net_rx *rx,
 	}
 
 	if (rx->local_match && is_replay(rx)) {
-		BT_WARN("Replay: src 0x%04x dst 0x%04x seq 0x%06x",
+		BT_DBG("Replay: src 0x%04x dst 0x%04x seq 0x%06x",
 			rx->ctx.addr, rx->ctx.recv_dst, (unsigned) rx->seq);
 		return -EINVAL;
 	}
