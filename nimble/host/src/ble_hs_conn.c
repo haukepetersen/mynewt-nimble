@@ -28,7 +28,7 @@
 #define BLE_HS_CONN_MIN_CHANS       3
 
 static SLIST_HEAD(, ble_hs_conn) ble_hs_conns;
-static struct os_mempool ble_hs_conn_pool;
+static struct os_mempool _ble_hs_conn_pool;
 
 static os_membuf_t ble_hs_conn_elem_mem[
     OS_MEMPOOL_SIZE(MYNEWT_VAL(BLE_MAX_CONNECTIONS),
@@ -44,7 +44,7 @@ ble_hs_conn_can_alloc(void)
     return 0;
 #endif
 
-    return ble_hs_conn_pool.mp_num_free >= 1 &&
+    return _ble_hs_conn_pool.mp_num_free >= 1 &&
            ble_l2cap_chan_pool.mp_num_free >= BLE_HS_CONN_MIN_CHANS &&
            ble_gatts_conn_can_alloc();
 }
@@ -133,7 +133,7 @@ ble_hs_conn_alloc(uint16_t conn_handle)
     struct ble_hs_conn *conn;
     int rc;
 
-    conn = os_memblock_get(&ble_hs_conn_pool);
+    conn = os_memblock_get(&_ble_hs_conn_pool);
     if (conn == NULL) {
         goto err;
     }
@@ -228,7 +228,7 @@ ble_hs_conn_free(struct ble_hs_conn *conn)
 #if MYNEWT_VAL(BLE_HS_DEBUG)
     memset(conn, 0xff, sizeof *conn);
 #endif
-    rc = os_memblock_put(&ble_hs_conn_pool, conn);
+    rc = os_memblock_put(&_ble_hs_conn_pool, conn);
     BLE_HS_DBG_ASSERT_EVAL(rc == 0);
 
     STATS_INC(ble_hs_stats, conn_delete);
@@ -525,9 +525,9 @@ ble_hs_conn_init(void)
 {
     int rc;
 
-    rc = os_mempool_init(&ble_hs_conn_pool, MYNEWT_VAL(BLE_MAX_CONNECTIONS),
+    rc = os_mempool_init(&_ble_hs_conn_pool, MYNEWT_VAL(BLE_MAX_CONNECTIONS),
                          sizeof (struct ble_hs_conn),
-                         ble_hs_conn_elem_mem, "ble_hs_conn_pool");
+                         ble_hs_conn_elem_mem, "_ble_hs_conn_pool");
     if (rc != 0) {
         return BLE_HS_EOS;
     }
