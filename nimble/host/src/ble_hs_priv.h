@@ -167,13 +167,13 @@ int ble_mqueue_put(struct ble_mqueue *mq, struct ble_npl_eventq *evq, struct os_
 
 #endif
 
-#if MYNEWT_VAL(BLE_HS_DEBUG)
+// #if MYNEWT_VAL(BLE_HS_DEBUG)
     #define BLE_HS_DBG_ASSERT(x) assert(x)
     #define BLE_HS_DBG_ASSERT_EVAL(x) assert(x)
-#else
-    #define BLE_HS_DBG_ASSERT(x)
-    #define BLE_HS_DBG_ASSERT_EVAL(x) ((void)(x))
-#endif
+// #else
+//     #define BLE_HS_DBG_ASSERT(x)
+//     #define BLE_HS_DBG_ASSERT_EVAL(x) ((void)(x))
+// #endif
 
 #ifdef __cplusplus
 }
