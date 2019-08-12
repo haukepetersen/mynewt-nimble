@@ -45,7 +45,7 @@
  */
 
 STAILQ_HEAD(ble_att_svr_entry_list, ble_att_svr_entry);
-static struct ble_att_svr_entry_list ble_att_svr_list;
+static struct ble_att_svr_entry_list _ble_att_svr_list;
 static struct ble_att_svr_entry_list ble_att_svr_hidden_list;
 
 static uint16_t ble_att_svr_id;
@@ -115,6 +115,7 @@ ble_att_svr_register(const ble_uuid_t *uuid, uint8_t flags,
         return BLE_HS_ENOMEM;
     }
 
+    printf("insert: ha_uuid %p\n", (void *)uuid);
     entry->ha_uuid = uuid;
     entry->ha_flags = flags;
     entry->ha_min_key_size = min_key_size;
@@ -122,7 +123,7 @@ ble_att_svr_register(const ble_uuid_t *uuid, uint8_t flags,
     entry->ha_cb = cb;
     entry->ha_cb_arg = cb_arg;
 
-    STAILQ_INSERT_TAIL(&ble_att_svr_list, entry, ha_next);
+    STAILQ_INSERT_TAIL(&_ble_att_svr_list, entry, ha_next);
 
     if (handle_id != NULL) {
         *handle_id = entry->ha_handle_id;
@@ -156,7 +157,7 @@ ble_att_svr_find_by_handle(uint16_t handle_id)
 {
     struct ble_att_svr_entry *entry;
 
-    for (entry = STAILQ_FIRST(&ble_att_svr_list);
+    for (entry = STAILQ_FIRST(&_ble_att_svr_list);
          entry != NULL;
          entry = STAILQ_NEXT(entry, ha_next)) {
 
@@ -189,21 +190,29 @@ ble_att_svr_find_by_uuid(struct ble_att_svr_entry *prev, const ble_uuid_t *uuid,
 {
     struct ble_att_svr_entry *entry;
 
+    printf("att find, %p %p, %i\n", (void *)prev, (void *)uuid, (int)end_handle);
+
     if (prev == NULL) {
-        entry = STAILQ_FIRST(&ble_att_svr_list);
+        entry = STAILQ_FIRST(&_ble_att_svr_list);
     } else {
         entry = STAILQ_NEXT(prev, ha_next);
     }
 
+
     for (;
          entry != NULL && entry->ha_handle_id <= end_handle;
          entry = STAILQ_NEXT(entry, ha_next)) {
+        printf("   entry: %p\n", (void *)entry);
+
+        printf("att uuid: %p, ha_uuid: %p\n", (void *)uuid, (void *)entry->ha_uuid);
 
         if (uuid == NULL || ble_uuid_cmp(entry->ha_uuid, uuid) == 0) {
+            printf("return %p\n", (void *)entry);
             return entry;
         }
     }
 
+    printf("return NULL\n");
     return NULL;
 }
 
@@ -797,7 +806,7 @@ ble_att_svr_fill_info(uint16_t start_handle, uint16_t end_handle,
     num_entries = 0;
     rc = 0;
 
-    STAILQ_FOREACH(ha, &ble_att_svr_list, ha_next) {
+    STAILQ_FOREACH(ha, &_ble_att_svr_list, ha_next) {
         if (ha->ha_handle_id > end_handle) {
             rc = 0;
             goto done;
@@ -1088,7 +1097,7 @@ ble_att_svr_fill_type_value(uint16_t conn_handle,
      * matching group.  For each attribute entry, determine if data needs to be
      * written to the response.
      */
-    STAILQ_FOREACH(ha, &ble_att_svr_list, ha_next) {
+    STAILQ_FOREACH(ha, &_ble_att_svr_list, ha_next) {
         if (ha->ha_handle_id < start_handle) {
             continue;
         }
@@ -1757,7 +1766,7 @@ ble_att_svr_build_read_group_type_rsp(uint16_t conn_handle,
 
     start_group_handle = 0;
     rsp->bagp_length = 0;
-    STAILQ_FOREACH(entry, &ble_att_svr_list, ha_next) {
+    STAILQ_FOREACH(entry, &_ble_att_svr_list, ha_next) {
         if (entry->ha_handle_id < start_handle) {
             continue;
         }
@@ -2688,14 +2697,14 @@ ble_att_svr_move_entries(struct ble_att_svr_entry_list *src,
 void
 ble_att_svr_hide_range(uint16_t start_handle, uint16_t end_handle)
 {
-    ble_att_svr_move_entries(&ble_att_svr_list, &ble_att_svr_hidden_list,
+    ble_att_svr_move_entries(&_ble_att_svr_list, &ble_att_svr_hidden_list,
                              start_handle, end_handle);
 }
 
 void
 ble_att_svr_restore_range(uint16_t start_handle, uint16_t end_handle)
 {
-    ble_att_svr_move_entries(&ble_att_svr_hidden_list, &ble_att_svr_list,
+    ble_att_svr_move_entries(&ble_att_svr_hidden_list, &_ble_att_svr_list,
                              start_handle, end_handle);
 }
 
@@ -2704,8 +2713,8 @@ ble_att_svr_reset(void)
 {
     struct ble_att_svr_entry *entry;
 
-    while ((entry = STAILQ_FIRST(&ble_att_svr_list)) != NULL) {
-        STAILQ_REMOVE_HEAD(&ble_att_svr_list, ha_next);
+    while ((entry = STAILQ_FIRST(&_ble_att_svr_list)) != NULL) {
+        STAILQ_REMOVE_HEAD(&_ble_att_svr_list, ha_next);
         ble_att_svr_entry_free(entry);
     }
 
@@ -2774,7 +2783,7 @@ ble_att_svr_init(void)
         }
     }
 
-    STAILQ_INIT(&ble_att_svr_list);
+    STAILQ_INIT(&_ble_att_svr_list);
     STAILQ_INIT(&ble_att_svr_hidden_list);
 
     ble_att_svr_id = 0;

@@ -39,7 +39,7 @@ static const ble_uuid_t *uuid_chr =
 static const ble_uuid_t *uuid_ccc =
     BLE_UUID16_DECLARE(BLE_GATT_DSC_CLT_CFG_UUID16);
 
-static const struct ble_gatt_svc_def **ble_gatts_svc_defs;
+static const struct ble_gatt_svc_def **_ble_gatts_svc_defs;
 static int ble_gatts_num_svc_defs;
 
 struct ble_gatts_svc_entry {
@@ -927,6 +927,8 @@ ble_gatts_register_svc(const struct ble_gatt_svc_def *svc,
     int rc;
     int i;
 
+    printf("reg svc %p\n", (void *)svc);
+
     if (!ble_gatts_svc_incs_satisfied(svc)) {
         return BLE_HS_EAGAIN;
     }
@@ -958,7 +960,9 @@ ble_gatts_register_svc(const struct ble_gatt_svc_def *svc,
     }
 
     /* Register each include. */
+    printf("reg svc %p - reg includes: %p\n", (void *)svc, (void *)svc->includes);
     if (svc->includes != NULL) {
+        printf("there are includes?!\n");
         for (i = 0; svc->includes[i] != NULL; i++) {
             idx = ble_gatts_find_svc_entry_idx(svc->includes[i]);
             BLE_HS_DBG_ASSERT_EVAL(idx != -1);
@@ -971,6 +975,7 @@ ble_gatts_register_svc(const struct ble_gatt_svc_def *svc,
     }
 
     /* Register each characteristic. */
+    printf("reg svc %p - reg chars: %p\n", (void *)svc, (void *)svc->characteristics);
     if (svc->characteristics != NULL) {
         for (chr = svc->characteristics; chr->uuid != NULL; chr++) {
             rc = ble_gatts_register_chr(svc, chr, register_cb, cb_arg);
@@ -979,6 +984,7 @@ ble_gatts_register_svc(const struct ble_gatt_svc_def *svc,
             }
         }
     }
+    puts("reg chars ok");
 
     STATS_INC(ble_gatts_stats, svcs);
 
@@ -1003,6 +1009,7 @@ ble_gatts_register_round(int *out_num_registered, ble_gatt_register_fn *cb,
             switch (rc) {
             case 0:
                 /* Service successfully registered. */
+                printf("succ reg for entry %p\n", (void *)entry);
                 entry->handle = handle;
                 entry->end_group_handle = ble_att_svr_prev_handle();
                 (*out_num_registered)++;
@@ -1152,8 +1159,8 @@ ble_gatts_connection_broken(uint16_t conn_handle)
 static void
 ble_gatts_free_svc_defs(void)
 {
-    free(ble_gatts_svc_defs);
-    ble_gatts_svc_defs = NULL;
+    free(_ble_gatts_svc_defs);
+    _ble_gatts_svc_defs = NULL;
     ble_gatts_num_svc_defs = 0;
 }
 
@@ -1214,7 +1221,7 @@ ble_gatts_start(void)
 
     ble_gatts_num_svc_entries = 0;
     for (i = 0; i < ble_gatts_num_svc_defs; i++) {
-        rc = ble_gatts_register_svcs(ble_gatts_svc_defs[i],
+        rc = ble_gatts_register_svcs(_ble_gatts_svc_defs[i],
                                      ble_hs_cfg.gatts_register_cb,
                                      ble_hs_cfg.gatts_register_arg);
         if (rc != 0) {
@@ -1222,6 +1229,7 @@ ble_gatts_start(void)
         }
     }
     ble_gatts_free_svc_defs();
+    puts("free ok");
 
     if (ble_gatts_num_cfgable_chrs == 0) {
         rc = 0;
@@ -1238,6 +1246,8 @@ ble_gatts_start(void)
         goto done;
     }
 
+    puts("mem init ok");
+
     /* Allocate the cached array of handles for the configuration
      * characteristics.
      */
@@ -1247,21 +1257,36 @@ ble_gatts_start(void)
         goto done;
     }
 
+    puts("memblock get ok");
+
     /* Fill the cache. */
     idx = 0;
     ha = NULL;
+    printf("ha: %p, uuid.u %p\n", (void *)ha, (void *)&uuid.u);
     while ((ha = ble_att_svr_find_by_uuid(ha, &uuid.u, 0xffff)) != NULL) {
+        printf("svc entry: %p\n", (void *)ha);
         chr = ha->ha_cb_arg;
+        printf("chr: %p\n", (void *)chr);
         allowed_flags = ble_gatts_chr_clt_cfg_allowed(chr);
+        printf("allowed flags: 0x%04x\n", (int)allowed_flags);
         if (allowed_flags != 0) {
+            printf("idx: %i, num_cfgable_chrs %i\n", idx, ble_gatts_num_cfgable_chrs);
+            assert(idx < ble_gatts_num_cfgable_chrs);
             BLE_HS_DBG_ASSERT_EVAL(idx < ble_gatts_num_cfgable_chrs);
 
+            printf("ble_gatts_clt_cfgs: %p\n", ble_gatts_clt_cfgs);
             ble_gatts_clt_cfgs[idx].chr_val_handle = ha->ha_handle_id + 1;
+            puts("val handle +1");
             ble_gatts_clt_cfgs[idx].allowed = allowed_flags;
+            puts("allowed set");
             ble_gatts_clt_cfgs[idx].flags = 0;
+            puts("flags set");
             idx++;
+            puts("idx ++");
         }
     }
+
+    puts("cache filled ok");
 
 done:
     if (rc != 0) {
@@ -1949,15 +1974,15 @@ ble_gatts_add_svcs(const struct ble_gatt_svc_def *svcs)
         goto done;
     }
 
-    p = realloc(ble_gatts_svc_defs,
-                (ble_gatts_num_svc_defs + 1) * sizeof *ble_gatts_svc_defs);
+    p = realloc(_ble_gatts_svc_defs,
+                (ble_gatts_num_svc_defs + 1) * sizeof *_ble_gatts_svc_defs);
     if (p == NULL) {
         rc = BLE_HS_ENOMEM;
         goto done;
     }
 
-    ble_gatts_svc_defs = p;
-    ble_gatts_svc_defs[ble_gatts_num_svc_defs] = svcs;
+    _ble_gatts_svc_defs = p;
+    _ble_gatts_svc_defs[ble_gatts_num_svc_defs] = svcs;
     ble_gatts_num_svc_defs++;
 
     rc = 0;
