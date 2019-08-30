@@ -100,7 +100,7 @@ ble_npl_eventq_get(struct ble_npl_eventq *evq, ble_npl_time_t tmo)
     } else if (tmo == BLE_NPL_TIME_FOREVER) {
         return (struct ble_npl_event *)event_wait(&evq->q);
     } else {
-        return (struct ble_npl_event *)event_wait_until(&evq->q, (tmo * 1000));
+        return (struct ble_npl_event *)event_wait_timeout(&evq->q, (tmo * 1000));
     }
 }
 
