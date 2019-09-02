@@ -55,8 +55,12 @@ void mystats_dump(void)
     printf("RX_non_mesh;%u\n", stats.rx_nonmesh);
     printf("RX_nonconn_IND;%u\n", stats.rx_nonconn_ind);
 
-    // printf("RX cand;%u\n", stats.rx_cand);
-    printf("RX_mesh_nomesh;%u\n", stats.rx_type_nomesh);
+
+    printf("RX_parse_cand;%u (should be same as RX_NONCONN_IND)\n", stats.rx_cand);
+    printf("RX_parse_nolen;%u (len field := 0)\n", stats.rx_cand_nolen);
+    printf("RX_parse_malformed;%u (len field < actual pkt len)\n", stats.rx_cand_malformed);
+    printf("RX_parse_ad_flags;%u\n", stats.rx_type_flags);
+    printf("RX_parse_type_nomesh;%u\n", stats.rx_type_nomesh);
 
     printf("RX_mesh_adv_data;%u\n", stats.rx_mesh_adv_in);
     printf("RX_mesh_adv_prov;%u\n", stats.rx_mesh_adv_prov);

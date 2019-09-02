@@ -52,6 +52,7 @@ typedef struct {
     unsigned rx_cand_nolen;
     unsigned rx_cand_malformed;
     unsigned rx_type_nomesh;
+    unsigned rx_type_flags;         /* ADV PDU is a flags AD field */
 
     unsigned rx_mesh_adv_beacon;
     unsigned rx_mesh_adv_prov;      /* mesh prov packet received (adv bearer) */

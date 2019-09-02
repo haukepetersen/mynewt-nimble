@@ -117,7 +117,7 @@ static inline void adv_send(struct os_mbuf *buf)
 	// duration = ((BT_MESH_TRANSMIT_COUNT(BT_MESH_ADV(buf)->xmit) + 1) *
 				// (adv_int + 10));
 	duration = (((BT_MESH_TRANSMIT_COUNT(BT_MESH_ADV(buf)->xmit) + 1) *
-				(adv_int)) + 3);
+				(adv_int)) + 7);
 
 
 	// printf("int: %i, xmit-int: %i, win: %i, xmit: %i, adv_int: %i\n",
@@ -345,6 +345,9 @@ static void bt_mesh_scan_cb(const bt_addr_le_t *addr, s8_t rssi,
 
 			bt_mesh_beacon_recv(buf);
 			break;
+        case BLE_HS_ADV_TYPE_FLAGS:
+            ++mystats.rx_type_flags;
+            /* fall through */
 		default:
 			++mystats.rx_type_nomesh;
 			break;
