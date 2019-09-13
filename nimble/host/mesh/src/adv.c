@@ -116,8 +116,10 @@ static inline void adv_send(struct os_mbuf *buf)
 		      BT_MESH_TRANSMIT_INT(BT_MESH_ADV(buf)->xmit));
 	// duration = ((BT_MESH_TRANSMIT_COUNT(BT_MESH_ADV(buf)->xmit) + 1) *
 				// (adv_int + 10));
-	duration = (((BT_MESH_TRANSMIT_COUNT(BT_MESH_ADV(buf)->xmit) + 1) *
-				(adv_int)) + 7);
+	duration = ((BT_MESH_TRANSMIT_COUNT(BT_MESH_ADV(buf)->xmit)) *
+				(adv_int + 10));
+	// duration = (((BT_MESH_TRANSMIT_COUNT(BT_MESH_ADV(buf)->xmit) + 1) *
+				// (adv_int)) + 10);
 
 
 	// printf("int: %i, xmit-int: %i, win: %i, xmit: %i, adv_int: %i\n",
