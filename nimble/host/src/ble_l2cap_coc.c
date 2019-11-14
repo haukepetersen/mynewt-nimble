@@ -186,9 +186,13 @@ ble_l2cap_coc_rx_fn(struct ble_l2cap_chan *chan)
     rx = &chan->coc_rx;
 
     om_total = OS_MBUF_PKTLEN(*om);
-    rc = ble_hs_mbuf_pullup_base(om, BLE_L2CAP_SDU_SIZE);
-    if (rc != 0) {
-        return rc;
+    /* Continuation LE frames might be of size 1, so we skip the pullup step
+     * for these */
+    if (om_total >= BLE_L2CAP_SDU_SIZE) {
+        rc = ble_hs_mbuf_pullup_base(om, BLE_L2CAP_SDU_SIZE);
+        if (rc != 0) {
+            return rc;
+        }
     }
 
     /* First LE frame */
