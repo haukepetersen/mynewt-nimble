@@ -3786,6 +3786,11 @@ ble_ll_conn_rx_isr_end(uint8_t *rxbuf, struct ble_mbuf_hdr *rxhdr)
     int rx_phy_mode;
     bool alloc_rxpdu = true;
 
+    // dbgpin_burst(1, 2);
+#ifdef MODULE_LLSTATS
+    llstats_rx();
+#endif
+
     rc = -1;
     connsm = g_ble_ll_conn_cur_sm;
 
