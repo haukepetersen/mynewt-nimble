@@ -892,9 +892,9 @@ ble_phy_tx_end_isr(void)
     uint32_t wfr_time;
 
     // dbgpin_sig(0);
-#ifdef MODULE_LLSTATS
-    llstats_tx();
-#endif
+// #ifdef MODULE_LLSTATS
+//     llstats_tx();
+// #endif
 
     /* Store PHY on which we've just transmitted smth */
     tx_phy_mode = g_ble_phy_data.phy_cur_phy_mode;
