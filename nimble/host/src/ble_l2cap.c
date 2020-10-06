@@ -26,9 +26,9 @@
 #include "ble_hs_priv.h"
 #include "ble_l2cap_coc_priv.h"
 
-#ifdef MODULE_EXPSTATS
-#include "expstats.h"
-#endif
+// #ifdef MODULE_EXPSTATS
+// #include "expstats.h"
+// #endif
 
 #if NIMBLE_BLE_CONNECT
 
@@ -70,9 +70,9 @@ ble_l2cap_chan_alloc(uint16_t conn_handle)
     memset(chan, 0, sizeof *chan);
     chan->conn_handle = conn_handle;
 
-#ifdef MODULE_EXPSTATS
-    expstats_log_ptr(EXPSTATS_NIM_HOST_CHAN_ALLOC, (void *)chan, (unsigned)conn_handle);
-#endif
+// #ifdef MODULE_EXPSTATS
+//     expstats_log_ptr(EXPSTATS_NIM_HOST_CHAN_ALLOC, (void *)chan, (unsigned)conn_handle);
+// #endif
     STATS_INC(ble_l2cap_stats, chan_create);
 
     return chan;
@@ -87,9 +87,9 @@ ble_l2cap_chan_free(struct ble_hs_conn *conn, struct ble_l2cap_chan *chan)
         return;
     }
 
-#ifdef MODULE_EXPSTATS
-    unsigned tmp_handle = (unsigned)chan->conn_handle;
-#endif
+// #ifdef MODULE_EXPSTATS
+//     unsigned tmp_handle = (unsigned)chan->conn_handle;
+// #endif
 
     os_mbuf_free_chain(chan->rx_buf);
     ble_l2cap_coc_cleanup_chan(conn, chan);
@@ -100,9 +100,9 @@ ble_l2cap_chan_free(struct ble_hs_conn *conn, struct ble_l2cap_chan *chan)
     rc = os_memblock_put(&ble_l2cap_chan_pool, chan);
     BLE_HS_DBG_ASSERT_EVAL(rc == 0);
 
-#ifdef MODULE_EXPSTATS
-    expstats_log_ptr(EXPSTATS_NIM_HOST_CHAN_FREE, (void *)chan, tmp_handle);
-#endif
+// #ifdef MODULE_EXPSTATS
+//     expstats_log_ptr(EXPSTATS_NIM_HOST_CHAN_FREE, (void *)chan, tmp_handle);
+// #endif
     STATS_INC(ble_l2cap_stats, chan_delete);
 }
 
