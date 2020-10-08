@@ -2606,6 +2606,10 @@ ble_ll_conn_event_end(struct ble_npl_event *ev)
         return;
     }
 
+#ifdef MODULE_LLSTATS
+    llstats_dump_conn_tim(connsm);
+#endif
+
     /* Reset "per connection event" variables */
     connsm->cons_rxd_bad_crc = 0;
     connsm->csmflags.cfbit.pkt_rxd = 0;
