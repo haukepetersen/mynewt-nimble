@@ -2196,6 +2196,9 @@ ble_ll_conn_next_event(struct ble_ll_conn_sm *connsm)
         connsm->anchor_point += connsm->conn_itvl_ticks;
         connsm->anchor_point_usecs += connsm->conn_itvl_usecs;
     } else {
+#ifdef MODULE_LLSTATS
+        llstats_dump_slave_latency(connsm, latency);
+#endif
         uint32_t ticks;
         ticks = os_cputime_usecs_to_ticks(itvl);
         connsm->anchor_point += ticks;
