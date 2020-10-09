@@ -2196,9 +2196,6 @@ ble_ll_conn_next_event(struct ble_ll_conn_sm *connsm)
         connsm->anchor_point += connsm->conn_itvl_ticks;
         connsm->anchor_point_usecs += connsm->conn_itvl_usecs;
     } else {
-#ifdef MODULE_LLSTATS
-        llstats_dump_slave_latency(connsm, latency);
-#endif
         uint32_t ticks;
         ticks = os_cputime_usecs_to_ticks(itvl);
         connsm->anchor_point += ticks;
@@ -2609,9 +2606,6 @@ ble_ll_conn_event_end(struct ble_npl_event *ev)
         return;
     }
 
-#ifdef MODULE_LLSTATS
-    llstats_dump_conn_tim(connsm);
-#endif
 
     /* Reset "per connection event" variables */
     connsm->cons_rxd_bad_crc = 0;
@@ -2626,12 +2620,22 @@ ble_ll_conn_event_end(struct ble_npl_event *ev)
     /* XXX: I think all this fine for when we do connection updates, but
        we may want to force the first event to be scheduled. Not sure */
     /* Schedule the next connection event */
+#ifdef MODULE_LLSTATS
+    unsigned resched = 0;
+#endif
     while (ble_ll_sched_conn_reschedule(connsm)) {
+#ifdef MODULE_LLSTATS
+        ++resched;
+#endif
         if (ble_ll_conn_next_event(connsm)) {
             ble_ll_conn_end(connsm, BLE_ERR_CONN_TERM_LOCAL);
             return;
         }
     }
+
+#ifdef MODULE_LLSTATS
+    llstats_dump_conn_tim(connsm, resched);
+#endif
 
     /*
      * This is definitely not perfect but hopefully will be fine in regards to
