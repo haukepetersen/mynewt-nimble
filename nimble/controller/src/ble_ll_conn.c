@@ -2633,9 +2633,9 @@ ble_ll_conn_event_end(struct ble_npl_event *ev)
         }
     }
 
-#ifdef MODULE_LLSTATS
-    llstats_dump_conn_tim(connsm, resched);
-#endif
+// #ifdef MODULE_LLSTATS
+    // llstats_dump_conn_tim(connsm, resched);
+// #endif
 
     /*
      * This is definitely not perfect but hopefully will be fine in regards to
