@@ -1244,6 +1244,15 @@ ble_phy_isr(void)
     /* Read irq register to determine which interrupts are enabled */
     irq_en = NRF_RADIO->INTENCLR;
 
+    if (NRF_RADIO->EVENTS_READY) {
+        if (NRF_RADIO->STATE == RADIO_STATE_STATE_Tx) {
+            dbgpin_pulse(1);
+        }
+        else {
+            dbgpin_set(0);
+        }
+    }
+
     /*
      * NOTE: order of checking is important! Possible, if things get delayed,
      * we have both an ADDRESS and DISABLED interrupt in rx state. If we get
@@ -1281,6 +1290,7 @@ ble_phy_isr(void)
 
     /* Receive packet end (we dont enable this for transmit) */
     if ((irq_en & RADIO_INTENCLR_END_Msk) && NRF_RADIO->EVENTS_END) {
+        dbgpin_clear(0);
         ble_phy_rx_end_isr();
     }
 
@@ -1497,6 +1507,9 @@ ble_phy_init(void)
     }
 
     ble_phy_dbg_time_setup();
+
+    NRF_RADIO->EVENTS_READY = 0;
+    NRF_RADIO->INTENSET_READY_Msk;
 
     return 0;
 }
