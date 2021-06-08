@@ -1685,7 +1685,7 @@ ble_l2cap_sig_echo_rsp(uint16_t conn_handle, struct ble_l2cap_sig_hdr *hdr,
     if (proc->ping.cb != NULL) {
         ble_npl_time_t now = ble_npl_time_get();
         rtt_ms = ble_npl_time_ticks_to_ms32(now - proc->ping.time_sent);
-        proc->ping.cb(rtt_ms, *om);
+        proc->ping.cb(conn_handle, rtt_ms, *om);
         ble_l2cap_sig_proc_free(proc);
     }
 
