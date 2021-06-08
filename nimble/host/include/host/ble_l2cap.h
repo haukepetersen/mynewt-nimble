@@ -246,7 +246,8 @@ struct ble_l2cap_chan_info {
 
 typedef int ble_l2cap_event_fn(struct ble_l2cap_event *event, void *arg);
 
-typedef void ble_l2cap_ping_fn(uint32_t rtt_ms, struct os_mbuf *om);
+typedef void ble_l2cap_ping_fn(uint16_t conn_handle, uint32_t rtt_ms,
+                               struct os_mbuf *om);
 
 uint16_t ble_l2cap_get_conn_handle(struct ble_l2cap_chan *chan);
 int ble_l2cap_create_server(uint16_t psm, uint16_t mtu,
