@@ -1979,6 +1979,9 @@ ble_l2cap_sig_ping(uint16_t conn_handle, ble_l2cap_ping_fn cb,
 
 
     rc = ble_l2cap_sig_tx(proc->conn_handle, txom);
+    if (rc != 0) {
+        os_mbuf_free_chain(txom);
+    }
     ble_l2cap_sig_process_status(proc, rc);
     return rc;
 }
